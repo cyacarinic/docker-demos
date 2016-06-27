@@ -1,0 +1,1 @@
+docker run centos /bin/echo 'Hola mundo xD'

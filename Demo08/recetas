@@ -1,0 +1,96 @@
+# GENERAR TOKEN
+$ docker-machine create -d virtualbox default # SI NO EXISTE MACHINE DEFAULT
+$ eval $(docker-machine env default)
+$ export token=$(docker run --rm swarm create)
+
+# CREACION DEL SWARM MASTER
+$ docker-machine create -d generic \
+ --generic-ssh-user vagrant \
+ --generic-ssh-key ../key \
+ --generic-ip-address 192.168.33.100 \
+ --engine-install-url "https://get.docker.com" \
+ --swarm --swarm-master --swarm-discovery token://$token \
+ swarm-master
+
+# GENERAR AGENTES
+$ docker-machine create -d generic \
+ --generic-ssh-user vagrant \
+ --generic-ssh-key ../key \
+ --generic-ip-address 192.168.33.101 \
+ --engine-install-url "https://get.docker.com" \
+ --swarm --swarm-discovery token://$token \
+ swarm-agente-01
+
+$ docker-machine create -d generic \
+ --generic-ssh-user vagrant \
+ --generic-ssh-key ../key \
+ --generic-ip-address 192.168.33.102 \
+ --engine-install-url "https://get.docker.com" \
+ --swarm --swarm-discovery token://$token \
+ swarm-agente-02
+
+$ docker-machine create -d generic \
+ --generic-ssh-user vagrant \
+ --generic-ssh-key ../key \
+ --generic-ip-address 192.168.33.103 \
+ --engine-install-url "https://get.docker.com" \
+ --swarm --swarm-discovery token://$token \
+ swarm-agente-03
+
+
+
+# CONECTARSE AL SWARM MASTER
+$ eval $(docker-machine env --swarm swarm-master)
+$ docker info
+$ docker-compose -f docker-staging.yml up -d
+
+# CONECTARSE POR SSH A UNA MACHINE
+$ docker-machine ssh swarm-agente-01
+
+# CONECTARSE A UN CONTAINER
+$ bash -c "clear && DOCKER_HOST=tcp://192.168.33.101:2376 DOCKER_CERT_PATH=/Users/cyacarini/.docker/machine/machines/swarm-agente-01 DOCKER_TLS_VERIFY=1 docker exec -it add2b46c69af_yachaytrasicion_server_yachay_transition_1 sh"
+
+$ docker exec -it <id_container> bash
+
+
+
+# DETENER CONTENEDORES
+$ docker-compose -f app-yachay-pe/docker/docker-compose.yml stop; docker-compose -f dashboard-yachay-pe/docker-compose.yml stop; docker-compose -f yachay-front-end/docker-compose.yml stop;
+
+# CONSTRUIR CONTENEDORES
+$ docker-compose -f app-yachay-pe/docker/docker-compose.yml build; docker-compose -f dashboard-yachay-pe/docker-compose.yml build; docker-compose -f yachay-front-end/docker-compose.yml build;
+
+# INICIAR CONTENEDORES
+$ docker-compose -f app-yachay-pe/docker/docker-compose.yml up -d; docker-compose -f dashboard-yachay-pe/docker-compose.yml up -d; docker-compose -f yachay-front-end/docker-compose.yml up -d;
+
+
+
+
+
+
+
+# app-yachay-pe/config/config-develpment.ini <-- añadir ip redis
+# dashboard-yachay-pe/templates/app/constast.js <-- urls base, base_api, expresion regular clave_panel
+# dashboard-yachay-pe/templates/app/dashboard/servicios/hosting/HostingController.js <-- validador y mensajes de password y password2
+# yachay-front-end/public/assets/js/scripts.js <-- urls de base y base_api
+# yachay-front-end/public/dominios.html <-- urls de base, base_api y url_dashboard
+# yachay-front-end/public/index.html <-- urls de base y base_api && links hacia dashboard
+
+CONFIG
+CONSTANTS
+DEVELOPMENT
+
+
+
+
+docker-machine create -d generic \
+ --generic-ip-address 159.203.160.134 \
+ --engine-install-url "https://get.docker.com" \
+ test
+
+
+
+
+
+
+

@@ -1,0 +1,19 @@
+demo_nginx:
+  image: jwilder/nginx-proxy
+  volumes:
+    - /var/run/docker.sock:/tmp/docker.sock:ro
+    - ./htpasswds:/etc/nginx/htpasswd
+  ports:
+    - "80:80"
+  environment:
+    - DEFAULT_HOST=foo.dev
+
+foo_service:
+  build: ./foo
+  environment:
+    - VIRTUAL_HOST=foo.dev
+
+bar_service:
+  build: ./bar
+  environment:
+    - VIRTUAL_HOST=bar.dev
