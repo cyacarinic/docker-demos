@@ -1,0 +1,48 @@
+################# KEYSTORE SERVICE
+consul:
+  image: progrium/consul
+  restart: unless-stopped
+  ports:
+    - "8500:8500"
+  hostname: consul
+  command: "-server -bootstrap"
+
+
+################# SWARM SERVICE
+swarm:
+  image: swarm
+  restart: unless-stopped
+  ports:
+    - "3376:2375"
+  volumes:
+    - /var/lib/boot2docker:/certs:ro
+  command: manage --tlsverify --tlscacert=/certs/ca.pem --tlscert=/certs/server.pem --tlskey=/certs/server-key.pem consul://192.168.99.101:8500
+
+
+################# LOADBALANCER
+interlock:
+  image: ehazlett/interlock:1.0.1
+  container_name: interlock
+  volumes:
+    - nginx:/etc/conf
+    - /var/lib/boot2docker:/var/lib/boot2docker:ro
+    - /var/run/docker.sock:/var/run/docker.sock
+    - ./config/config.toml:/etc/config.toml
+  ports:
+    - "8080"
+  command: run -c /etc/config.toml
+
+nginx:
+  image: nginx
+  container_name: nginx
+  labels:
+    - "com.example.description=Accounting webapp"
+    - "interlock.ext.name=nginx"
+  ports:
+    - "80:80"
+  links:
+    - interlock:interlock
+  volumes:
+    - nginx:/etc/conf  
+  command: nginx -g "daemon off;" -c /etc/conf/nginx.conf
+

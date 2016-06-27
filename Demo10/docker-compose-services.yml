@@ -1,0 +1,87 @@
+version: "2"
+
+services:
+  ################# DATABASE
+  postgres:
+    image: postgres:9.4
+    container_name: db
+    environment:
+      DOCKER_HOST: 192.168.99.102:3376
+      constraint: com.function==dbstore
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - voteapp
+
+  redis:
+    image: redis
+    container_name: redis
+    environment:
+      DOCKER_HOST: 192.168.99.102:3376
+      constraint: com.function==dbstore
+    ports:
+      - "6379"
+    networks:
+      - voteapp
+
+  ################# WORKERS
+  worker:
+    image: docker/example-voting-app-worker
+    environment:
+      DOCKER_HOST: 192.168.99.102:3376
+      constraint: com.function==worker01
+    networks:
+      voteapp:
+        aliases:
+          - workers
+
+  ################# APPLICATIONS
+  result-app:
+    image: docker/example-voting-app-result-app
+    labels:
+      interlock.hostname: "results"
+      interlock.domain:   "demo.dev"
+    environment:
+      DOCKER_HOST: 192.168.99.102:3376
+      constraint: com.function==dbstore
+    ports:
+      - "80"
+    networks:
+      - voteapp
+
+  voting-app:
+    image: docker/example-voting-app-voting-app
+    labels:
+      interlock.hostname: "vote"
+      interlock.domain:   "demo.dev"
+    environment:
+      DOCKER_HOST: 192.168.99.102:3376
+      constraint: com.function==frontend01
+    ports:
+      - "80"
+    networks:
+      - voteapp
+
+volumes:
+  db-data:
+
+networks:
+    voteapp:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
